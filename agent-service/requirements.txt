@@ -1,0 +1,40 @@
+# Pinned so a clean build is reproducible. torch (CPU-only) is installed
+# separately in the Dockerfile from PyTorch's CPU wheel index to keep the
+# image small and avoid pulling CUDA.
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+grpcio==1.68.1
+grpcio-tools==1.68.1
+protobuf==5.29.2
+
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# Postgres + pgvector access
+psycopg[binary]==3.2.3
+pgvector==0.3.6
+
+# PDF parsing
+PyMuPDF==1.25.1
+
+# Local embeddings (pulls torch, which we preinstall as CPU-only)
+sentence-transformers==3.3.1
+
+# Numerics + the logistic-regression citation classifier
+numpy==2.2.1
+scikit-learn==1.6.0
+joblib==1.4.2
+
+# The multi-step agent
+langchain==0.3.14
+langchain-core==0.3.29
+langchain-community==0.3.14
+langchain-ollama==0.2.2
+langgraph==0.2.62
+
+httpx==0.28.1
+
+# Tests
+pytest==8.3.4
