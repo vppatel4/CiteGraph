@@ -1,12 +1,12 @@
 [
-  {
-    "id": "na-001",
-    "question": "What is the capital of France?",
-    "note": "Off-topic for research papers; the system must answer 'not found in the provided papers'."
-  },
-  {
-    "id": "na-002",
-    "question": "What was the stock price of the company mentioned in the papers last week?",
-    "note": "No paper contains live market data; must refuse."
-  }
+  {"id": "na-001", "question": "What is the capital of France?", "note": "General knowledge, unrelated to any uploaded paper."},
+  {"id": "na-002", "question": "What was the company's stock price last week?", "note": "Live market data appears in no paper."},
+  {"id": "na-003", "question": "Who won the football match yesterday?", "note": "Current events, not in any paper."},
+  {"id": "na-004", "question": "What is my current account balance?", "note": "Personal data the system has no access to."},
+  {"id": "na-005", "question": "Write me a poem about the ocean.", "note": "Creative task, not answerable from research papers."},
+  {"id": "na-006", "question": "What will the weather be tomorrow?", "note": "Forecast data, not in any paper."},
+  {"id": "na-007", "question": "How do I bake sourdough bread?", "note": "Off-topic how-to unrelated to the corpus."},
+  {"id": "na-008", "question": "What is the phone number of the first author?", "note": "Contact details that papers do not contain."},
+  {"id": "na-009", "question": "Which programming language is best for web development?", "note": "Opinion question outside the papers' scope."},
+  {"id": "na-010", "question": "What is the meaning of life?", "note": "Philosophical question no paper addresses."}
 ]
