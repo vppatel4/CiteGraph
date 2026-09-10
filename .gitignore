@@ -1,0 +1,43 @@
+# Private interview-prep notes — never commit this
+EXPLANATION.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# Generated protobuf stubs (regenerated at build time)
+agent-service/app/proto/*_pb2.py
+agent-service/app/proto/*_pb2_grpc.py
+agent-service/app/proto/*_pb2.pyi
+gateway/internal/pb/
+
+# Trained eval artifacts
+eval/classifier.joblib
+agent-service/app/eval/classifier.joblib
+
+# Go
+gateway/gateway
+gateway/bin/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/node_modules/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Uploaded papers / local data
+data/
+uploads/
