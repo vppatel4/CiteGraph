@@ -1,0 +1,8 @@
+# Keep line endings LF in the repo so shell scripts and files copied into Linux
+# containers work regardless of the OS a contributor checked out on.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+*.joblib binary

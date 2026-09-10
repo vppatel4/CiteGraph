@@ -1,0 +1,16 @@
+[
+  {
+    "id": "ex-001",
+    "question": "How does the method reduce false positives?",
+    "claim": "The system verifies each citation against its source chunk before showing it.",
+    "cited_chunk": "To reduce false positives, every generated citation is checked against the exact source passage it points to, and any citation whose passage does not support the claim is dropped.",
+    "label": "supports"
+  },
+  {
+    "id": "ex-002",
+    "question": "What dataset was used for evaluation?",
+    "claim": "The authors evaluated on a hand-labeled set of citation pairs.",
+    "cited_chunk": "The training procedure used the Adam optimizer with a learning rate of 0.001 over 50 epochs.",
+    "label": "does_not_support"
+  }
+]

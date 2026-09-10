@@ -1,0 +1,124 @@
+# One command brings up the whole stack:  docker compose up --build
+#
+# Services:
+#   db        Postgres + pgvector (all vector search happens here, locally)
+#   ollama    the local LLM runtime (pulls a small model on first start)
+#   agent     Python FastAPI + LangGraph agent (gRPC + a small HTTP health API)
+#   gateway   Go API gateway (auth, uploads, rate limiting, gRPC client)
+#   frontend  React app served by nginx
+#
+# Nothing here needs an account, a card, or the internet beyond pulling the
+# base images and the Ollama model the first time.
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-citegraph}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-citegraph}
+      POSTGRES_DB: ${POSTGRES_DB:-citegraph}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-citegraph} -d ${POSTGRES_DB:-citegraph}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  agent:
+    build:
+      context: .
+      dockerfile: agent-service/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-citegraph}:${POSTGRES_PASSWORD:-citegraph}@db:5432/${POSTGRES_DB:-citegraph}
+      AGENT_GRPC_PORT: ${AGENT_GRPC_PORT:-50051}
+      AGENT_HTTP_PORT: ${AGENT_HTTP_PORT:-8000}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2:3b}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-384}
+      CHUNK_SIZE_TOKENS: ${CHUNK_SIZE_TOKENS:-350}
+      CHUNK_OVERLAP_TOKENS: ${CHUNK_OVERLAP_TOKENS:-60}
+      RETRIEVAL_TOP_K: ${RETRIEVAL_TOP_K:-6}
+      RETRIEVAL_MIN_SIMILARITY: ${RETRIEVAL_MIN_SIMILARITY:-0.25}
+      CITATION_SUPPORT_THRESHOLD: ${CITATION_SUPPORT_THRESHOLD:-0.45}
+      # Cache the downloaded embedding model between restarts.
+      HF_HOME: /models
+    ports:
+      - "${AGENT_HTTP_PORT:-8000}:8000"
+      - "${AGENT_GRPC_PORT:-50051}:50051"
+    volumes:
+      - models:/models
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)\""]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-citegraph}:${POSTGRES_PASSWORD:-citegraph}@db:5432/${POSTGRES_DB:-citegraph}?sslmode=disable
+      GATEWAY_PORT: ${GATEWAY_PORT:-8080}
+      AGENT_GRPC_ADDR: agent:${AGENT_GRPC_PORT:-50051}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-real-use-but-fine-for-local-demo}
+      JWT_TTL_HOURS: ${JWT_TTL_HOURS:-72}
+      RATE_LIMIT_UPLOAD_PER_MIN: ${RATE_LIMIT_UPLOAD_PER_MIN:-10}
+      RATE_LIMIT_ASK_PER_MIN: ${RATE_LIMIT_ASK_PER_MIN:-30}
+      DEMO_EMAIL: ${DEMO_EMAIL:-demo@citegraph.dev}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-demo1234}
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      agent:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      gateway:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  pgdata:
+  ollama:
+  models:

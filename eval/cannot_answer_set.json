@@ -1,0 +1,12 @@
+[
+  {
+    "id": "na-001",
+    "question": "What is the capital of France?",
+    "note": "Off-topic for research papers; the system must answer 'not found in the provided papers'."
+  },
+  {
+    "id": "na-002",
+    "question": "What was the stock price of the company mentioned in the papers last week?",
+    "note": "No paper contains live market data; must refuse."
+  }
+]

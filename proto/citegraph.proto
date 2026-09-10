@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package citegraph;
+
+// The Go gateway is the only client of this service. It forwards the AI-heavy
+// work (ingesting a PDF, answering a question) to the Python agent service.
+// Keeping this contract small on purpose — the gateway owns auth and users,
+// the agent owns everything that touches embeddings and the LLM.
+
+option go_package = "github.com/vppatel4/citegraph/gateway/internal/pb;pb";
+
+service AgentService {
+  // Cheap liveness/readiness probe used by the gateway health endpoint.
+  rpc Health(HealthRequest) returns (HealthReply);
+
+  // Parse a PDF, chunk it, embed the chunks, and store everything in Postgres.
+  rpc IngestPaper(IngestRequest) returns (IngestReply);
+
+  // Run the full decompose -> retrieve -> draft -> verify -> finalize pipeline.
+  rpc Ask(AskRequest) returns (AskReply);
+}
+
+message HealthRequest {}
+
+message HealthReply {
+  bool ok = 1;
+  string detail = 2;         // e.g. "ollama: ready, embeddings: loaded"
+  bool llm_ready = 3;
+  bool embeddings_ready = 4;
+}
+
+message IngestRequest {
+  string user_id = 1;
+  string filename = 2;
+  bytes content = 3;         // raw PDF bytes
+}
+
+message IngestReply {
+  string paper_id = 1;
+  string title = 2;
+  int32 num_pages = 3;
+  int32 num_chunks = 4;
+}
+
+message AskRequest {
+  string user_id = 1;
+  string question = 2;
+  // Optional: restrict retrieval to these paper ids. Empty means "all my papers".
+  repeated string paper_ids = 3;
+}
+
+message Citation {
+  string paper_id = 1;
+  string paper_title = 2;
+  string section = 3;
+  int32 page = 4;
+  string snippet = 5;        // the exact chunk text the claim was checked against
+  string claim = 6;          // the sentence in the answer this citation backs
+  double confidence = 7;     // support score in [0,1]
+  bool verified = 8;         // passed the citation-verification check
+}
+
+message AskReply {
+  string answer = 1;                 // final, verified answer (markdown)
+  bool answered = 2;                 // false => "the papers don't address this"
+  repeated Citation citations = 3;
+  repeated string sub_questions = 4; // what the decompose step produced
+  int32 dropped_citations = 5;       // how many the verifier removed
+  string refusal_reason = 6;         // set when answered == false
+}
