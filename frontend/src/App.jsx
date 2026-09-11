@@ -49,7 +49,7 @@ function Sidebar({ papers, onUpload, uploading }) {
           {uploading ? (
             <><span className="spinner" /> parsing &amp; embedding…</>
           ) : (
-            <>Drop a PDF here or <span style={{ color: "var(--aqua)" }}>browse</span></>
+            <>Drop a PDF here or <span style={{ color: "var(--accent)" }}>browse</span></>
           )}
           <input
             ref={inputRef} type="file" accept="application/pdf" hidden
