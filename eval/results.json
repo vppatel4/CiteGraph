@@ -18,5 +18,10 @@
       "f1": 0.816
     }
   },
-  "cannot_answer": null
+  "cannot_answer": {
+    "total": 10,
+    "refused": 10,
+    "false_answers": 0,
+    "false_answer_rate": 0.0
+  }
 }
