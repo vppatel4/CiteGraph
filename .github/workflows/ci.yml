@@ -24,7 +24,7 @@ jobs:
         run: pip install numpy scikit-learn pydantic-settings joblib pytest
       - name: Run tests
         working-directory: agent-service
-        run: pytest -q
+        run: python -m pytest -q
 
   go-tests:
     name: Go unit tests
@@ -77,12 +77,22 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+      - name: Free up disk space
+        # The agent image (torch + ML deps) plus the Ollama and pgvector images
+        # can exhaust the runner's ~14 GB. Reclaim space the runner isn't using.
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          docker image prune -af || true
+          df -h
       - name: Prepare env (use a tiny model to keep CI fast)
         run: |
           cp .env.example .env
           echo "OLLAMA_MODEL=qwen2.5:0.5b" >> .env
       - name: Build and start the stack
         run: docker compose up -d --build
+      - name: Disk after build
+        if: always()
+        run: df -h
       - name: Run the smoke test
         env:
           READY_TIMEOUT: "900"
