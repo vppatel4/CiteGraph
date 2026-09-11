@@ -90,8 +90,12 @@ services:
       RATE_LIMIT_ASK_PER_MIN: ${RATE_LIMIT_ASK_PER_MIN:-30}
       DEMO_EMAIL: ${DEMO_EMAIL:-demo@citegraph.dev}
       DEMO_PASSWORD: ${DEMO_PASSWORD:-demo1234}
+      EVAL_RESULTS_JSON: /eval/results.json
     ports:
       - "${GATEWAY_PORT:-8080}:8080"
+    volumes:
+      # Read-only so the eval dashboard endpoint can serve the latest numbers.
+      - ./eval:/eval:ro
     depends_on:
       db:
         condition: service_healthy
