@@ -42,8 +42,8 @@ export function AnswerText({ text }) {
   };
   for (const line of lines) {
     const t = line.trim();
-    if (/^[-*]\s+/.test(t)) {
-      bullets.push(t.replace(/^[-*]\s+/, ""));
+    if (/^[-*•–]\s+/.test(t)) {
+      bullets.push(t.replace(/^[-*•–]\s+/, ""));
     } else {
       flush();
       blocks.push(<p key={`p-${blocks.length}`}>{withMarkers(t)}</p>);
