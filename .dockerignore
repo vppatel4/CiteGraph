@@ -1,0 +1,24 @@
+# Keep the build context small and, importantly, keep locally-generated
+# artifacts out of the images. A classifier.joblib trained on the host with a
+# different scikit-learn version must NOT be baked in — the image trains its own
+# (matching-version) model via `make eval`, and otherwise falls back to the
+# similarity threshold.
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+.git/
+.github/
+.venv/
+.venv-test/
+venv/
+node_modules/
+frontend/node_modules/
+frontend/dist/
+*.log
+
+# Trained model artifacts (regenerated inside the container by `make eval`)
+eval/classifier.joblib
+agent-service/app/eval/classifier.joblib
+
+# Private notes — never ship in an image
+EXPLANATION.md
