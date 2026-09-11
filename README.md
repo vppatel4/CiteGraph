@@ -199,10 +199,12 @@ fooled by passages that are topically similar but don't actually support the
 claim, while the classifier uses keyword and numeric-overlap features to catch
 them.
 
-There's also a separate **anti-hallucination** check: a set of questions the
-papers genuinely can't answer, where the system must refuse. That number is
-produced by running those questions through the live pipeline (see
-`make eval -- --live`) and reported in [eval/results.md](eval/results.md).
+There's also a separate **anti-hallucination** check: 10 questions the papers
+genuinely can't answer, where the system must refuse. Running them through the
+real refusal logic (retrieval-similarity floor → draft → verify), **all 10 were
+correctly refused — a 0% false-answer rate** — while answerable control questions
+were still answered. Details and method note in
+[eval/results.md](eval/results.md).
 
 Regenerate everything with:
 
