@@ -23,8 +23,10 @@ PyMuPDF==1.25.1
 # Local embeddings (pulls torch, which we preinstall as CPU-only)
 sentence-transformers==3.3.1
 
-# Numerics + the logistic-regression citation classifier
-numpy==2.2.1
+# Numerics + the logistic-regression citation classifier.
+# Pinned <2 because langchain 0.3.x requires numpy<2 on Python < 3.12, and the
+# agent image runs Python 3.11. 1.26.4 is compatible with torch/sklearn/pgvector.
+numpy==1.26.4
 scikit-learn==1.6.0
 joblib==1.4.2
 
