@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+# Builds the gateway with generated gRPC stubs and runs `go test ./...`.
+# Used by `make test-gateway` and by CI.
+
+FROM golang:1.23-bookworm
+WORKDIR /src
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.35.2 \
+    && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+ENV PATH="/go/bin:${PATH}"
+
+COPY proto/ ./proto/
+COPY gateway/ ./gateway/
+
+WORKDIR /src/gateway
+RUN mkdir -p internal/pb \
+    && protoc -I ../proto \
+        --go_out=. --go_opt=module=github.com/vppatel4/citegraph/gateway \
+        --go-grpc_out=. --go-grpc_opt=module=github.com/vppatel4/citegraph/gateway \
+        ../proto/citegraph.proto
+RUN go mod tidy
+
+CMD ["go", "test", "./..."]
