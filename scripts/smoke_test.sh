@@ -41,7 +41,8 @@ echo "got a token"
 
 say "3/5 upload a tiny generated PDF"
 TMP_PDF="$(mktemp --suffix=.pdf)"
-python3 - "$TMP_PDF" <<'PY'
+PY_BIN="$(command -v python3 || command -v python)"
+"${PY_BIN}" - "$TMP_PDF" <<'PY'
 import sys
 text = "CiteGraph reduces false positives by verifying every citation against its source chunk."
 stream = b"BT /F1 12 Tf 72 720 Td (" + text.encode() + b") Tj ET"
