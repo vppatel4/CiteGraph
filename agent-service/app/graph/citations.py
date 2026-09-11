@@ -78,6 +78,19 @@ class Verifier:
     def __init__(self) -> None:
         self.model = clf.load(settings.classifier_path)
         self.threshold = settings.citation_support_threshold
+        # A model pickled by a different scikit-learn version can load but fail at
+        # predict time. Probe it once; if it's unusable, fall back to the
+        # similarity threshold for the whole run instead of erroring mid-answer.
+        if self.model is not None:
+            try:
+                clf.predict_proba(self.model, [0.5, 0.5, 0.5, 0.5, 0.5])
+            except Exception as exc:  # noqa: BLE001
+                import logging
+
+                logging.getLogger("citegraph.verify").warning(
+                    "trained classifier is unusable (%s); using similarity threshold", exc
+                )
+                self.model = None
 
     @property
     def method(self) -> str:
