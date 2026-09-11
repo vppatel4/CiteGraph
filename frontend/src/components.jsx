@@ -6,7 +6,7 @@ export function ConfidenceRing({ value }) {
   const pct = Math.max(0, Math.min(1, value));
   const r = 14;
   const c = 2 * Math.PI * r;
-  const color = pct >= 0.66 ? "var(--aqua)" : pct >= 0.45 ? "var(--amber)" : "var(--coral)";
+  const color = pct >= 0.66 ? "var(--ok)" : pct >= 0.45 ? "var(--warn)" : "var(--danger)";
   return (
     <svg className="ring" viewBox="0 0 34 34" title={`confidence ${(pct * 100).toFixed(0)}%`}>
       <circle cx="17" cy="17" r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="3.5" />
@@ -66,7 +66,7 @@ function withMarkers(text) {
 }
 
 export function CitationCard({ c }) {
-  const bar = c.confidence >= 0.66 ? "var(--aqua)" : c.confidence >= 0.45 ? "var(--amber)" : "var(--coral)";
+  const bar = c.confidence >= 0.66 ? "var(--ok)" : c.confidence >= 0.45 ? "var(--warn)" : "var(--danger)";
   return (
     <div className="cite" style={{ "--bar": bar }}>
       <div className="head">
