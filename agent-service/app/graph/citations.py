@@ -51,7 +51,7 @@ def is_structural(line: str) -> bool:
     if s.endswith(":"):
         return True
     # A short bullet/label without much content.
-    body = re.sub(r"^[-*\d.\)\s]+", "", s)
+    body = re.sub(r"^[-*•–\d.\)\s]+", "", s)
     return len(body.split()) <= 5
 
 
