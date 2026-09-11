@@ -139,6 +139,31 @@ def write_results(path: str, base: Scores, clf: Scores, meta: dict, na: dict | N
         fh.write("\n".join(lines))
 
 
+def write_results_json(path: str, base: Scores, clf: Scores, meta: dict, na: dict | None) -> None:
+    """Structured version the gateway serves to the eval dashboard."""
+    payload = {
+        "available": True,
+        "threshold": settings.citation_support_threshold,
+        "citation": {
+            "count": meta["count"],
+            "positives": meta["positives"],
+            "cv_note": meta["cv_note"],
+            "baseline": base.as_dict(),
+            "classifier": clf.as_dict(),
+        },
+        "cannot_answer": None
+        if na is None
+        else {
+            "total": na["total"],
+            "refused": na["refused"],
+            "false_answers": na["false_answers"],
+            "false_answer_rate": round(na["false_answer_rate"], 3),
+        },
+    }
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--labeled", default="eval/labeled_set.json")
@@ -159,7 +184,9 @@ def main() -> None:
         print(f"cannot-answer false-answer rate: {na['false_answer_rate']:.1%}")
 
     write_results(args.out, base, clf, meta, na)
-    print(f"wrote {args.out}")
+    json_path = args.out.rsplit(".", 1)[0] + ".json"
+    write_results_json(json_path, base, clf, meta, na)
+    print(f"wrote {args.out} and {json_path}")
 
 
 if __name__ == "__main__":
