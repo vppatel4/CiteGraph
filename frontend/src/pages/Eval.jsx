@@ -19,7 +19,7 @@ export default function Eval() {
           <p className="section-title">Evaluation</p>
           <p className="muted">{data.message || "No evaluation results yet."}</p>
           <p className="faint" style={{ fontSize: 13 }}>
-            Run <code style={{ fontFamily: "var(--mono)", color: "var(--aqua)" }}>make eval</code> to
+            Run <code style={{ fontFamily: "var(--mono)", color: "var(--accent)" }}>make eval</code> to
             score the citation verifier and the anti-hallucination check.
           </p>
         </div>
@@ -72,18 +72,18 @@ export default function Eval() {
             </div>
             <div className="stat">
               <div className="k">Correctly refused</div>
-              <div className="v aqua">{na.refused}</div>
+              <div className="v ok">{na.refused}</div>
             </div>
             <div className="stat">
               <div className="k">False-answer rate</div>
-              <div className={"v " + (na.false_answer_rate === 0 ? "aqua" : "amber")}>
+              <div className={"v " + (na.false_answer_rate === 0 ? "ok" : "warn")}>
                 {(na.false_answer_rate * 100).toFixed(0)}%
               </div>
             </div>
           </div>
         ) : (
           <p className="muted" style={{ fontSize: 13.5, marginTop: 4 }}>
-            Run <code style={{ fontFamily: "var(--mono)", color: "var(--aqua)" }}>
+            Run <code style={{ fontFamily: "var(--mono)", color: "var(--accent)" }}>
               make eval
             </code>{" "}
             against a user with papers loaded (add <code style={{ fontFamily: "var(--mono)" }}>--live --user-id</code>)

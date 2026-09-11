@@ -7,13 +7,7 @@ import App from "./App.jsx";
 import Login from "./pages/Login.jsx";
 
 function Backdrop() {
-  return (
-    <div className="backdrop" aria-hidden="true">
-      <div className="blob a" />
-      <div className="blob b" />
-      <div className="blob c" />
-    </div>
-  );
+  return <div className="backdrop" aria-hidden="true" />;
 }
 
 function Protected() {

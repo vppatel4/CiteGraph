@@ -41,7 +41,7 @@ export default function Login() {
         <div className="brand" style={{ marginBottom: 4 }}>
           <span className="tag">multi-paper Q&amp;A</span>
         </div>
-        <h1>Cite<span style={{ color: "var(--amber)" }}>Graph</span></h1>
+        <h1>Cite<span style={{ color: "var(--accent)" }}>Graph</span></h1>
         <p className="sub">
           Ask questions across your research papers and get answers where every
           citation is checked against its source before you see it.
