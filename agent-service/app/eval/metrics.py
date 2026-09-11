@@ -26,6 +26,14 @@ class Scores:
             f"{self.recall:.3f} | {self.f1:.3f}"
         )
 
+    def as_dict(self) -> dict:
+        return {
+            "accuracy": round(self.accuracy, 3),
+            "precision": round(self.precision, 3),
+            "recall": round(self.recall, 3),
+            "f1": round(self.f1, 3),
+        }
+
 
 def score(y_true: list[int], y_pred: list[int]) -> Scores:
     if len(y_true) != len(y_pred):
