@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 420" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#9a8f7e"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="940" height="420" rx="16" fill="#f4f1ea"/>
+
+  <!-- client + services spine -->
+  <!-- User -->
+  <rect x="28" y="150" width="96" height="54" rx="10" fill="#f1ede3" stroke="#d9cfba"/>
+  <text x="76" y="182" text-anchor="middle" font-size="14" fill="#2a2621">User</text>
+
+  <!-- Frontend -->
+  <rect x="150" y="144" width="150" height="66" rx="10" fill="#ffffff" stroke="#d9cfba"/>
+  <text x="225" y="176" text-anchor="middle" font-size="14" font-weight="600" fill="#2a2621">Frontend</text>
+  <text x="225" y="195" text-anchor="middle" font-size="11" fill="#6b6153">React + nginx</text>
+
+  <!-- Gateway -->
+  <rect x="330" y="144" width="186" height="66" rx="10" fill="#ffffff" stroke="#d9cfba"/>
+  <text x="423" y="172" text-anchor="middle" font-size="14" font-weight="600" fill="#2a2621">Go API gateway</text>
+  <text x="423" y="191" text-anchor="middle" font-size="11" fill="#6b6153">auth · uploads · rate limit</text>
+
+  <!-- Agent -->
+  <rect x="548" y="120" width="252" height="120" rx="10" fill="#ffffff" stroke="#d9cfba"/>
+  <text x="674" y="147" text-anchor="middle" font-size="14" font-weight="600" fill="#2a2621">Python agent service</text>
+  <text x="674" y="165" text-anchor="middle" font-size="11" fill="#6b6153">FastAPI · LangChain / LangGraph</text>
+  <rect x="560" y="178" width="228" height="48" rx="7" fill="#eef2f4" stroke="#cdd9df"/>
+  <text x="674" y="199" text-anchor="middle" font-size="10.5" fill="#33505f">decompose → retrieve → draft</text>
+  <text x="674" y="216" text-anchor="middle" font-size="10.5" fill="#33505f">→ verify → finalize</text>
+
+  <!-- backends -->
+  <rect x="330" y="316" width="200" height="64" rx="10" fill="#f1ede3" stroke="#d9cfba"/>
+  <text x="430" y="344" text-anchor="middle" font-size="13" font-weight="600" fill="#2a2621">PostgreSQL + pgvector</text>
+  <text x="430" y="362" text-anchor="middle" font-size="10.5" fill="#6b6153">users · papers · chunks + vectors</text>
+
+  <rect x="560" y="322" width="172" height="52" rx="10" fill="#f1ede3" stroke="#d9cfba"/>
+  <text x="646" y="346" text-anchor="middle" font-size="13" font-weight="600" fill="#2a2621">Local embeddings</text>
+  <text x="646" y="363" text-anchor="middle" font-size="10.5" fill="#6b6153">sentence-transformers</text>
+
+  <rect x="762" y="322" width="150" height="52" rx="10" fill="#f1ede3" stroke="#d9cfba"/>
+  <text x="837" y="346" text-anchor="middle" font-size="13" font-weight="600" fill="#2a2621">Ollama</text>
+  <text x="837" y="363" text-anchor="middle" font-size="10.5" fill="#6b6153">local LLM (llama 3.2)</text>
+
+  <!-- spine arrows -->
+  <line x1="124" y1="177" x2="148" y2="177" stroke="#9a8f7e" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="300" y1="177" x2="328" y2="177" stroke="#9a8f7e" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="314" y="170" text-anchor="middle" font-size="9.5" fill="#6b6153">REST</text>
+  <line x1="516" y1="177" x2="546" y2="177" stroke="#9a8f7e" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="531" y="170" text-anchor="middle" font-size="9.5" fill="#6b6153">gRPC</text>
+
+  <!-- gateway -> postgres -->
+  <line x1="408" y1="210" x2="408" y2="314" stroke="#9a8f7e" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="414" y="268" text-anchor="start" font-size="9.5" fill="#6b6153">read/write</text>
+
+  <!-- agent -> postgres (vector search) -->
+  <line x1="575" y1="240" x2="505" y2="314" stroke="#9a8f7e" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="498" y="286" text-anchor="end" font-size="9.5" fill="#6b6153">vector search</text>
+
+  <!-- agent -> embeddings -->
+  <line x1="650" y1="240" x2="648" y2="320" stroke="#9a8f7e" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="656" y="285" text-anchor="start" font-size="9.5" fill="#6b6153">encode</text>
+
+  <!-- agent -> ollama -->
+  <line x1="762" y1="240" x2="820" y2="320" stroke="#9a8f7e" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="806" y="285" text-anchor="start" font-size="9.5" fill="#6b6153">draft</text>
+</svg>
