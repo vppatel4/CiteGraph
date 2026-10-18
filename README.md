@@ -25,12 +25,13 @@ removed; if nothing survives, the whole answer becomes an honest "not found".
 
 I measured how well that check works on a hand-labeled set of 48
 `(claim, passage, verdict)` pairs (half supported, half not, including passages
-that look similar but say something different). The classifier scores **F1 0.82**
-against **0.75** for a plain similarity threshold — mostly by not being fooled on
-precision (0.80 vs 0.66). On a separate set of 10 questions the papers can't
-answer, it refused all 10 (a 0% false-answer rate). The numbers live in
-[`eval/results.md`](eval/results.md) and in the app's Evaluation tab, and you can
-regenerate them with `make eval`.
+that look similar but say something different). Tuned toward precision — it keeps
+a citation only when the classifier is confident — the verifier reaches **94%
+precision** (F1 0.81), versus **66% precision** (F1 0.75) for a plain similarity
+threshold. On a separate set of 25 questions the papers can't answer, it correctly
+refused **24 of 25 (a 4% false-answer rate)** instead of guessing. The numbers
+live in [`eval/results.md`](eval/results.md) and in the app's Evaluation tab, and
+you can regenerate them with `make eval`.
 
 ## Architecture diagram
 
