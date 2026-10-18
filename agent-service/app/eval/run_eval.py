@@ -60,16 +60,24 @@ def evaluate_citations(labeled: list[dict]) -> tuple[Scores, Scores, dict]:
     base_scores = score(list(y), base_pred)
 
     # --- classifier: honest cross-validated predictions ---
+    # The verifier runs at a precision-oriented operating point: a citation is
+    # kept only when the classifier is at least `classifier_threshold` confident.
+    # Score at that same threshold so the reported numbers match runtime.
+    thr = settings.classifier_threshold
     min_class = int(min(np.bincount(y))) if len(y) else 0
     if min_class >= 2:
         folds = min(5, min_class)
         skf = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
-        cv_pred = cross_val_predict(classifier.new_model(), feats, y, cv=skf)
+        cv_proba = cross_val_predict(
+            classifier.new_model(), feats, y, cv=skf, method="predict_proba"
+        )[:, 1]
+        cv_pred = (cv_proba >= thr).astype(int)
         clf_scores = score(list(y), list(cv_pred))
-        cv_note = f"{folds}-fold cross-validation"
+        cv_note = f"{folds}-fold cross-validation, kept at classifier probability ≥ {thr}"
     else:
         model = classifier.train(feats, y)
-        clf_scores = score(list(y), list(model.predict(feats)))
+        proba = model.predict_proba(feats)[:, 1]
+        clf_scores = score(list(y), list((proba >= thr).astype(int)))
         cv_note = "trained==tested (too few examples for cross-validation)"
 
     # Train on everything and save so the live app uses the classifier.

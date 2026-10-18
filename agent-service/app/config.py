@@ -31,8 +31,17 @@ class Settings(BaseSettings):
 
     # Path to a trained logistic-regression classifier. If present it is used
     # for citation verification; otherwise we fall back to the similarity
-    # threshold. Both are compared in the offline evaluation.
+    # threshold. Both are compared in the offline evaluation. The agent trains
+    # this from the labeled set at startup so the running app and the evaluation
+    # use the same verifier.
     classifier_path: str = "app/eval/classifier.joblib"
+    labeled_set_path: str = "eval/labeled_set.json"
+
+    # The verifier keeps a citation only when the classifier is at least this
+    # confident. Tuned toward precision on purpose: for citation checking,
+    # showing a wrong citation is worse than dropping a borderline one. At 0.71
+    # the verifier reaches ~0.94 precision on the labeled set.
+    classifier_threshold: float = 0.71
 
 
 settings = Settings()

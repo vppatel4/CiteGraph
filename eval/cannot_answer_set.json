@@ -8,5 +8,21 @@
   {"id": "na-007", "question": "How do I bake sourdough bread?", "note": "Off-topic how-to unrelated to the corpus."},
   {"id": "na-008", "question": "What is the phone number of the first author?", "note": "Contact details that papers do not contain."},
   {"id": "na-009", "question": "Which programming language is best for web development?", "note": "Opinion question outside the papers' scope."},
-  {"id": "na-010", "question": "What is the meaning of life?", "note": "Philosophical question no paper addresses."}
+  {"id": "na-010", "question": "What is the meaning of life?", "note": "Philosophical question no paper addresses."},
+
+  {"id": "na-011", "question": "What learning rate was used to train the citation classifier?", "note": "Domain-adjacent but not stated in the papers."},
+  {"id": "na-012", "question": "How many GPUs are required to run the system?", "note": "Hardware detail not in the papers."},
+  {"id": "na-013", "question": "What is the average query latency in milliseconds?", "note": "Performance metric not reported."},
+  {"id": "na-014", "question": "How large was the training dataset used for the embedding model?", "note": "Not described in the uploaded papers."},
+  {"id": "na-015", "question": "Does the system support papers written in languages other than English?", "note": "Not covered by the papers."},
+  {"id": "na-016", "question": "What open-source license is the code released under?", "note": "Licensing is not mentioned in the papers."},
+  {"id": "na-017", "question": "How does the system handle scanned PDFs that contain only images?", "note": "Edge case not addressed."},
+  {"id": "na-018", "question": "What is the maximum number of papers the system can store?", "note": "Capacity limit not stated."},
+  {"id": "na-019", "question": "How much does it cost to run per thousand queries?", "note": "Cost figures not in the papers."},
+  {"id": "na-020", "question": "What accuracy does the system reach on the SQuAD benchmark?", "note": "A benchmark the papers never used."},
+  {"id": "na-021", "question": "Who funded this research?", "note": "Funding/acknowledgements not present."},
+  {"id": "na-022", "question": "What is the p99 latency under concurrent load?", "note": "Load-testing numbers not reported."},
+  {"id": "na-023", "question": "How does the approach compare to Pinecone's managed vector service?", "note": "No such comparison in the papers."},
+  {"id": "na-024", "question": "How many layers does the embedding model have?", "note": "Model internals not described."},
+  {"id": "na-025", "question": "What was the inter-annotator agreement on the labeled set?", "note": "Not reported in the papers."}
 ]

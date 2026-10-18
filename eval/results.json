@@ -4,7 +4,7 @@
   "citation": {
     "count": 48,
     "positives": 24,
-    "cv_note": "5-fold cross-validation",
+    "cv_note": "5-fold cross-validation, kept at classifier probability \u2265 0.71",
     "baseline": {
       "accuracy": 0.708,
       "precision": 0.656,
@@ -12,16 +12,16 @@
       "f1": 0.75
     },
     "classifier": {
-      "accuracy": 0.812,
-      "precision": 0.8,
-      "recall": 0.833,
-      "f1": 0.816
+      "accuracy": 0.833,
+      "precision": 0.944,
+      "recall": 0.708,
+      "f1": 0.81
     }
   },
   "cannot_answer": {
-    "total": 10,
-    "refused": 10,
-    "false_answers": 0,
-    "false_answer_rate": 0.0
+    "total": 25,
+    "refused": 24,
+    "false_answers": 1,
+    "false_answer_rate": 0.04
   }
 }

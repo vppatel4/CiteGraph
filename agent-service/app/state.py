@@ -37,6 +37,16 @@ def warmup() -> None:
             log.info("embedding model loaded")
         except Exception as exc:  # noqa: BLE001 - stay up regardless
             log.warning("embeddings not ready yet: %s", exc)
+
+        # Train the citation classifier now that embeddings are available, so the
+        # verifier uses it at runtime instead of the plain similarity threshold.
+        if embeddings_ready:
+            try:
+                from app.eval.trainer import build_and_save
+
+                build_and_save()
+            except Exception as exc:  # noqa: BLE001
+                log.warning("could not train citation classifier: %s", exc)
         try:
             from app.graph.llm import ensure_model
 

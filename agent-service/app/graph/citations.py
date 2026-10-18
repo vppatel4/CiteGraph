@@ -78,6 +78,7 @@ class Verifier:
     def __init__(self) -> None:
         self.model = clf.load(settings.classifier_path)
         self.threshold = settings.citation_support_threshold
+        self.classifier_threshold = settings.classifier_threshold
         # A model pickled by a different scikit-learn version can load but fail at
         # predict time. Probe it once; if it's unusable, fall back to the
         # similarity threshold for the whole run instead of erroring mid-answer.
@@ -107,7 +108,7 @@ class Verifier:
         return sim
 
     def is_supported(self, score: float) -> bool:
-        cutoff = 0.5 if self.model is not None else self.threshold
+        cutoff = self.classifier_threshold if self.model is not None else self.threshold
         return score >= cutoff
 
 
