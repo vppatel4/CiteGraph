@@ -11,6 +11,15 @@ anything it can't back up. Everything runs locally with Ollama, local
 embeddings, and Postgres + pgvector in Docker, so there are no API keys or
 paid services.
 
+## Demo
+
+https://github.com/user-attachments/assets/61edf714-701a-4fad-a7bc-dcf6d4ede116
+
+In the demo I sign up, upload three papers from arXiv,
+ask a question, and then ask something the papers don't cover to show the
+refusal. The model runs on CPU, so I sped up the part where it writes the
+answer.
+
 ## How citations are checked
 
 The model that writes the answer doesn't get to check its own work.
