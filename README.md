@@ -1,7 +1,7 @@
 # CiteGraph
 
 Ask a question across a stack of research papers and get an answer where every
-citation is checked against its source before you see it — and where the app says
+citation is checked against its source before you see it - and where the app says
 "the provided papers don't address this" instead of making something up.
 
 Most "chat with your PDFs" tools staple a citation onto an answer whether or not
