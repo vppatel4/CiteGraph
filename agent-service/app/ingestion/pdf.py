@@ -72,29 +72,65 @@ def _is_heading(line: str) -> str | None:
     return None
 
 
+def _clean(text: str) -> str:
+    # Some PDFs have NUL bytes in their text layer, and Postgres rejects them.
+    return text.replace("\x00", "")
+
+
+def _is_title_candidate(text: str) -> bool:
+    if len(text) < 8 or text.lower() in ("abstract",):
+        return False
+    return not text.lower().startswith(("arxiv", "doi", "http"))
+
+
 def _guess_title(first_page_text: str, fallback: str) -> str:
     for line in first_page_text.splitlines():
         candidate = line.strip()
-        # Skip obvious non-titles.
-        if len(candidate) < 8 or candidate.lower() in ("abstract",):
-            continue
-        if candidate.lower().startswith(("arxiv", "doi", "http")):
-            continue
-        return candidate[:300]
+        if _is_title_candidate(candidate):
+            return candidate[:300]
     return fallback
+
+
+def _title_from_font_size(page_dict: dict) -> str | None:
+    """Pick the title as the largest text on the first page.
+
+    The first text line is often a license notice or a journal header, but the
+    title is almost always set in the biggest font. Titles can wrap, so every
+    line at that size is joined together.
+    """
+    lines: list[tuple[float, str]] = []
+    for block in page_dict.get("blocks", []):
+        for line in block.get("lines", []):
+            spans = line.get("spans", [])
+            text = _clean("".join(s.get("text", "") for s in spans)).strip()
+            if spans and text:
+                lines.append((max(s.get("size", 0) for s in spans), text))
+
+    sizes = [size for size, text in lines if _is_title_candidate(text)]
+    if not sizes:
+        return None
+    biggest = max(sizes)
+    title = " ".join(text for size, text in lines if abs(size - biggest) < 0.5)
+    return title[:300] if _is_title_candidate(title) else None
 
 
 def parse_pdf(content: bytes, filename: str) -> tuple[str, int, list[Segment]]:
     doc = fitz.open(stream=io.BytesIO(content), filetype="pdf")
     num_pages = doc.page_count
 
-    first_page_text = doc.load_page(0).get_text("text") if num_pages else ""
-    title = _guess_title(first_page_text, fallback=filename.rsplit(".", 1)[0])
+    fallback = filename.rsplit(".", 1)[0]
+    if num_pages:
+        first_page = doc.load_page(0)
+        title = _title_from_font_size(first_page.get_text("dict")) or _guess_title(
+            _clean(first_page.get_text("text")), fallback=fallback
+        )
+    else:
+        title = fallback
 
     segments: list[Segment] = []
     current_section = "Body"
     for page_index in range(num_pages):
-        text = doc.load_page(page_index).get_text("text")
+        text = _clean(doc.load_page(page_index).get_text("text"))
         buffer: list[str] = []
 
         def flush() -> None:
