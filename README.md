@@ -1,80 +1,74 @@
 # CiteGraph
 
-Ask a question across a stack of research papers and get an answer where every
-citation is checked against its source before you see it - and where the app says
-"the provided papers don't address this" instead of making something up.
+CiteGraph lets you upload research papers and ask questions about them. Every
+citation in the answer is checked against the passage it points to, and if the
+papers don't cover the question, it says so instead of making something up.
 
-Most "chat with your PDFs" tools staple a citation onto an answer whether or not
-the cited passage actually says what the answer claims. CiteGraph does the
-opposite: it drafts an answer with a small local model, then checks each citation
-on its own, drops any claim it can't back up, and refuses when the papers don't
-cover the question. Everything runs locally and free — a local LLM through
-Ollama, local embeddings, and Postgres + pgvector in Docker. No API keys, no
-sign-ups, no cloud.
+A lot of "chat with your PDFs" tools attach citations without checking if the
+cited text actually supports the claim. I wanted to fix that. CiteGraph drafts
+an answer with a small local model, checks each citation separately, and drops
+anything it can't back up. Everything runs locally with Ollama, local
+embeddings, and Postgres + pgvector in Docker, so there are no API keys or
+paid services.
 
-## How it checks every citation
+## How citations are checked
 
-The interesting part is that the language model never gets to grade its own work.
+The model that writes the answer doesn't get to check its own work.
 
-The draft comes back with inline `[n]` markers pointing at the numbered passages
-it was given. For each cited sentence, a separate step measures whether the cited
-passage really supports the claim — using the embedding similarity between the
-two plus a tiny logistic-regression classifier (embedding similarity, keyword
-overlap, numeric overlap, and lengths). A sentence whose citations all fail is
-removed; if nothing survives, the whole answer becomes an honest "not found".
+The draft uses `[n]` markers that point to the numbered passages it was given.
+For each cited sentence, a separate step decides whether the passage supports
+the claim. It uses a small logistic regression classifier with a few features:
+embedding similarity, keyword overlap, number overlap, and text length. If all
+of a sentence's citations fail, the sentence is removed. If nothing is left,
+the answer becomes "not found".
 
-I measured how well that check works on a hand-labeled set of 48
-`(claim, passage, verdict)` pairs (half supported, half not, including passages
-that look similar but say something different). Tuned toward precision — it keeps
-a citation only when the classifier is confident — the verifier reaches **94%
-precision** (F1 0.81), versus **66% precision** (F1 0.75) for a plain similarity
-threshold. On a separate set of 25 questions the papers can't answer, it correctly
-refused **24 of 25 (a 4% false-answer rate)** instead of guessing. The numbers
-live in [`eval/results.md`](eval/results.md) and in the app's Evaluation tab, and
-you can regenerate them with `make eval`.
+To test this I labeled 48 claim/passage pairs by hand, half supported and half
+not. The verifier gets 94% precision with an F1 of 0.81, compared to 66%
+precision and an F1 of 0.75 for a plain similarity threshold. I also tested 25
+questions the papers can't answer, and it refused 24 of them. The full results
+are in [`eval/results.md`](eval/results.md) and the app's Evaluation tab, and
+you can rerun them with `make eval`.
 
-## Architecture diagram
+## Architecture
 
 ![CiteGraph architecture](docs/media/architecture.svg)
 
-The browser talks to a Go gateway over REST. The gateway owns accounts, uploads,
-and rate limiting, and hands the AI work to a Python agent over gRPC. The agent
-runs the pipeline, reads and writes Postgres (vectors included, via pgvector),
-embeds text locally, and uses Ollama only to draft.
+The frontend talks to a Go gateway over REST. The gateway handles accounts,
+uploads, and rate limiting, and sends the AI work to a Python agent over gRPC.
+The agent runs the pipeline, stores text and vectors in Postgres with pgvector,
+creates embeddings locally, and uses Ollama to write the draft.
 
 ## Tech stack
 
 | Part | Tech |
 |---|---|
-| Frontend | React + Vite, served by nginx |
-| API gateway | Go (chi, JWT auth, gRPC client) |
-| Agent service | Python + FastAPI, LangChain + LangGraph |
-| Embeddings | sentence-transformers (local) |
-| LLM | Ollama — llama 3.2 3B (local) |
-| Storage + search | PostgreSQL + pgvector |
+| Frontend | React, Vite, nginx |
+| API gateway | Go, chi, JWT, gRPC |
+| Agent service | Python, FastAPI, LangChain, LangGraph |
+| Embeddings | sentence-transformers |
+| LLM | Ollama with llama3.2 3B |
+| Database | PostgreSQL + pgvector |
 | PDF parsing | PyMuPDF |
-| Citation verifier | scikit-learn (logistic regression) |
+| Citation verifier | scikit-learn |
 | Dev / CI | Docker Compose, pytest, Go test, GitHub Actions |
 
 ## How it works
 
-When you ask a question it runs through five steps:
+Each question goes through five steps:
 
-1. **Decompose** — if the question is broad ("compare X and Y"), the model splits
-   it into a couple of focused sub-questions. Simple questions pass through as-is.
-2. **Retrieve** — each sub-question becomes a vector, and the most similar chunks
-   of your papers come back from pgvector. If nothing is even loosely relevant,
-   it stops here and says so.
-3. **Draft** — the retrieved chunks and the question go to the local model, which
-   writes an answer with `[n]` citation markers and bullets for multi-part asks.
-4. **Verify** — each citation is checked independently (see above) and anything
-   unsupported is dropped.
-5. **Finalize** — you get the verified answer, the surviving citations (paper,
-   section, page, and a confidence score), and a count of whatever was dropped.
+1. **Decompose** - broad questions like "compare X and Y" are split into
+   smaller sub-questions. Simple questions are left as they are.
+2. **Retrieve** - each sub-question is embedded and the closest chunks are
+   pulled from pgvector. If nothing relevant comes back, it stops here.
+3. **Draft** - the model writes an answer from the retrieved chunks with `[n]`
+   citation markers.
+4. **Verify** - each citation is checked and unsupported sentences are removed.
+5. **Finalize** - you get the answer, the citations with paper, section, page,
+   and confidence score, and how many claims were dropped.
 
 ## Running it
 
-You just need **Docker Desktop** running (no account needed for local use).
+You only need Docker Desktop.
 
 ```bash
 git clone https://github.com/vppatel4/CiteGraph.git
@@ -83,17 +77,17 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Then open **http://localhost:5173** and log in with the seeded demo account:
+Open http://localhost:5173 and log in with the demo account:
 
 ```
 demo@citegraph.dev  /  demo1234
 ```
 
-(or create your own account on the login screen).
+You can also create your own account from the login screen.
 
-On the first run the agent downloads a small embedding model (~90 MB) and pulls
-the Ollama model (`llama3.2:3b`, ~2 GB). The dot in the top bar shows **warming
-up** until that finishes, then **ready** — give it a few minutes the first time.
+The first run downloads an embedding model of about 90 MB and the
+`llama3.2:3b` model of about 2 GB, so it takes a few minutes. The status dot in
+the top bar changes from "warming up" to "ready" when it's done.
 
 | Service | URL |
 |---|---|
@@ -103,24 +97,18 @@ up** until that finishes, then **ready** — give it a few minutes the first tim
 | Postgres | localhost:5432 |
 | Ollama | http://localhost:11434 |
 
-Ports are overridable in `.env`. Stop with `docker compose down`, or
-`docker compose down -v` to also wipe the database and downloaded models.
+Ports can be changed in `.env`. Run `docker compose down` to stop, or
+`docker compose down -v` to also delete the database and downloaded models.
 
 ## Try it
 
-![CiteGraph demo](docs/media/demo.gif)
-
-<!-- Placeholder: record a short screen capture of the flow below and save it as docs/media/demo.gif -->
-
-1. Log in with the demo account above.
-2. Drag two or three research-paper PDFs onto the sidebar and wait for them to
-   appear with page and chunk counts.
-3. Ask something specific, e.g. _"What methods do these papers use to reduce
-   false positives?"_
-4. Read the answer and look at the citations — each shows the paper, section and
-   page, the exact passage it was checked against, a confidence ring, and a
-   verified badge.
-5. Ask something the papers can't answer, e.g. _"What is the capital of France?"_,
-   and watch it refuse instead of guessing.
-6. Open the **Evaluation** tab to see the citation-check numbers and the
-   cannot-answer rate.
+1. Log in with the demo account.
+2. Drag two or three research papers onto the sidebar and wait for them to
+   finish processing.
+3. Ask something specific, like "What methods do these papers use to reduce
+   false positives?"
+4. Check the citations. Each one shows the paper, section, page, the passage it
+   was checked against, and a confidence score.
+5. Ask something the papers don't cover, like "What is the capital of France?",
+   and it should refuse to answer.
+6. Open the Evaluation tab to see the verifier results.
